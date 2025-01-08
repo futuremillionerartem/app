@@ -1,122 +1,150 @@
-/* Общие стили */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
 body {
-    margin: 0;
-    font-family: 'Roboto', sans-serif;
-    background-color: #0D0D0D;
-    color: #ffffff;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
+  font-family: Arial, sans-serif;
+  background-color: #0D0D0D;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .container {
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  padding-bottom: 60px; /* Отступ для меню */
 }
 
-/* Секция с мозгом */
-.brain-section {
-    margin-top: 20px;
+.header {
+  margin: 20px;
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  background-color: #131313; /* Цвет фона */
+  padding: 12px 14vh; /* Внутренние отступы */
+  border-radius: 30px; /* Закругленные углы */
+  color: #fff; /* Цвет текста */
+  max-width: 300px; /* Ограничение по ширине */
 }
 
-.brain-icon {
-    width: 100px;
-    height: auto;
-    animation: pulse 2s infinite;
+
+.circle-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2vh;
+  padding: 20px;
+  width: 100%;
 }
 
-.brain-score {
-    font-size: 32px;
-    font-weight: bold;
-    margin-top: 10px;
+.circle {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  text-align: center;
+  font-size: 14px;
+  font-weight: bold;
+  border: 5px solid;
 }
 
-.brain-text {
-    font-size: 16px;
-    color: #aaa;
+.yellow {
+  border-color: #ffeb3b;
 }
 
-/* Кнопки сообщества */
-.community-buttons {
-    width: 90%;
-    margin: 0 auto;
-    margin-top: 10vh;
-    margin-bottom: -20vh;
+.blue {
+  border-color: #2196f3;
 }
 
-.community-btn {
-    background-color: #151515; /* Новый цвет кнопки */
-    border: #515151 solid 1px;
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: bold;
-    padding: 10px 20px;
-    margin: 10px 0;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-    transition: transform 0.2s, background-color 0.3s;
+.red {
+  border-color: #f44336;
 }
 
-.community-btn:hover {
-    background-color: #151515; /* Новый цвет при наведении */
-    transform: scale(1.05);
+.green {
+  border-color: #4caf50;
 }
 
-.community-btn img {
-    width: 20px;
-    height: 20px;
+.purple {
+  border-color: #9c27b0;
 }
 
-/* Нижняя навигация */
-.bottom-navigation {
-    border-top: #aaa solid 1px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #131313;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    max-width: 100%;
-    height: 8%;
+.dark-blue {
+  border-color: #3f51b5;
 }
 
-.nav-item {
-    text-decoration: none;
-    color: #ffffff;
-    font-size: 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    transition: transform 0.2s, color 0.3s;
-    padding: 20px;
+.circle span {
+  font-size: 12px;
+  font-weight: normal;
 }
 
-.nav-item img {
-    width: 24px;
-    height: 24px;
-    margin-bottom: 5px;
+/* Фиксированное меню снизу */
+.bottom-menu {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+  background-color: #131313;;
+  padding: 16px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
 }
 
-.nav-item:hover {
-    color: #1e88e5;
-    transform: translateY(-5px);
+.menu-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: #fff;
+  cursor: pointer;
 }
+
+.menu-item img {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+}
+
 
 /* Анимации */
-@keyframes pulse {
-    0%, 100% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.1);
-    }
+.header {
+  transition: transform 0.3s ease; /* Плавное увеличение */
+}
+
+.header:hover {
+  transform: scale(1.1); /* Увеличение заголовка при наведении */
+}
+
+.circle {
+  transition: transform 0.3s ease, box-shadow 0.3s ease; /* Плавное увеличение и тень */
+}
+
+.circle:hover {
+  transform: scale(1.2); /* Увеличение круга при наведении */
+}
+
+.menu-item {
+  transition: transform 0.3s ease; /* Анимация движения вверх */
+}
+
+.menu-item:hover {
+  transform: translateY(-5px); /* Легкий подъем при наведении */
+}
+
+/* Убираем выделение текста */
+body,
+.header,
+.circle,
+.menu-item, img{ 
+user-select: none;
+-webkit-tap-highlight-color: transparent;
 }
