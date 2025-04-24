@@ -7,33 +7,39 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        /* Используем Inter шрифт */
         body { font-family: 'Inter', sans-serif; }
+        /* Стили для градиентной кнопки */
         .gradient-button {
             background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
             transition: all 0.3s ease;
             box-shadow: 0 4px 15px 0 rgba(79, 172, 254, 0.4);
         }
         .gradient-button:hover {
-            background-position: right center;
+            background-position: right center; /* Изменение градиента при наведении */
             box-shadow: 0 6px 20px 0 rgba(79, 172, 254, 0.6);
         }
-        .gradient-button:active { transform: scale(0.95); }
+        .gradient-button:active {
+            transform: scale(0.95); /* Эффект нажатия */
+        }
+        /* Стили для неактивной кнопки */
         .gradient-button:disabled {
-             background-image: linear-gradient(to right, #a0aec0 0%, #cbd5e0 100%);
+             background-image: linear-gradient(to right, #a0aec0 0%, #cbd5e0 100%); /* Серый градиент */
              cursor: not-allowed;
              opacity: 0.6;
              box-shadow: none;
         }
         /* Стили для индикатора загрузки */
         .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4facfe; /* Blue */
+            border: 4px solid #f3f3f3; /* Светло-серый */
+            border-top: 4px solid #4facfe; /* Синий */
             border-radius: 50%;
             width: 30px;
             height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto; /* Центрирование */
         }
+        /* Анимация вращения */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -58,31 +64,33 @@
     </div>
 
     <div id="errorMessage" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg text-center hidden z-50">
-        </div>
+    </div>
 
     <script>
+        // Получаем ссылки на элементы DOM
         const buyButton = document.getElementById('buyButton');
         const errorMessage = document.getElementById('errorMessage');
         const infoMessage = document.getElementById('infoMessage');
         const loader = document.getElementById('loader');
+        const tg = window.Telegram.WebApp; // Получаем объект Telegram Web App
 
-        // --- ВАЖНО: Укажите URL вашего бэкэнда ---
-        // Если фронтенд и бэкенд на одном домене, можно использовать относительный путь:
+        // --- ВАЖНО: Укажите HTTPS URL вашего развернутого бэкэнда ---
+        // Замените 'YOUR_DEPLOYED_BACKEND_URL' на реальный URL
+        const BACKEND_URL = 'https://github.com/futuremillionerartem/server.git/create-invoice';
+        // Пример: const BACKEND_URL = 'https://your-app-name.onrender.com/create-invoice';
+        // -----------------------------------------------------------
 
-        // Если на разных, укажите полный HTTPS URL:
-        const BACKEND_URL = 'http://localhost:3000';
-        // -----------------------------------------
+        let invoiceSlug = null; // Переменная для хранения slug счета
 
-        let invoiceSlug = null; // Переменная для хранения slug
-
-        // Функция для отображения ошибок
+        // Функция для отображения сообщений об ошибках
         function showError(message) {
             errorMessage.textContent = message;
             errorMessage.classList.remove('hidden');
-            setTimeout(() => errorMessage.classList.add('hidden'), 5000); // Скрыть через 5 сек
+            // Скрываем сообщение через 5 секунд
+            setTimeout(() => errorMessage.classList.add('hidden'), 5000);
         }
 
-        // Функция для получения slug с бэкэнда
+        // Асинхронная функция для получения slug счета с бэкэнда
         async function fetchInvoiceSlug() {
             console.log('Запрос slug с бэкэнда...');
             loader.classList.remove('hidden'); // Показать индикатор загрузки
@@ -90,26 +98,34 @@
             infoMessage.textContent = 'Подготовка счета...';
 
             try {
+                // Отправляем GET-запрос на бэкенд
                 const response = await fetch(BACKEND_URL);
+
+                // Проверяем, успешен ли ответ
                 if (!response.ok) {
-                    // Попытка прочитать тело ошибки от бэкенда
-                    let errorDetails = 'Не удалось получить данные от сервера.';
+                    let errorDetails = `Статус: ${response.status}.`;
                     try {
+                        // Пытаемся получить детали ошибки из ответа сервера
                         const errorData = await response.json();
-                        errorDetails = errorData.error || errorDetails;
+                        errorDetails += ` ${errorData.error || response.statusText}`;
                         if (errorData.details) {
                              errorDetails += ` (${errorData.details})`;
                         }
-                    } catch (e) { /* Игнорируем ошибку парсинга JSON ответа */ }
-                    throw new Error(`Ошибка сети: ${response.status} ${response.statusText}. ${errorDetails}`);
+                    } catch (e) {
+                        // Если тело ответа не JSON или пустое
+                        errorDetails += ` ${response.statusText}`;
+                    }
+                    throw new Error(`Ошибка сети при получении счета. ${errorDetails}`);
                 }
 
+                // Парсим JSON-ответ
                 const data = await response.json();
 
+                // Проверяем, есть ли ссылка на счет в ответе
                 if (data.invoiceUrl) {
-                    // Извлекаем slug из URL (он находится после 't.me/invoice/')
+                    // Извлекаем slug из URL (последняя часть после '/')
                     const urlParts = data.invoiceUrl.split('/');
-                    invoiceSlug = urlParts[urlParts.length - 1]; // Последняя часть URL - это slug
+                    invoiceSlug = urlParts[urlParts.length - 1];
                     console.log('Slug успешно получен:', invoiceSlug);
                     buyButton.disabled = false; // Активировать кнопку
                     infoMessage.textContent = ''; // Очистить инфо-сообщение
@@ -121,67 +137,77 @@
                 console.error('Ошибка при получении slug:', error);
                 showError(`Ошибка получения счета: ${error.message}`);
                 infoMessage.textContent = 'Не удалось подготовить счет.';
-                 // Оставляем кнопку неактивной
+                // Оставляем кнопку неактивной
             } finally {
-                 loader.classList.add('hidden'); // Скрыть индикатор загрузки
+                 loader.classList.add('hidden'); // Скрыть индикатор загрузки в любом случае
             }
         }
 
-        // --- Инициализация приложения ---
+        // --- Инициализация Telegram Web App ---
         try {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand(); // Раскрыть на весь экран для лучшего вида
+            tg.ready(); // Сообщаем Telegram, что приложение готово
+            tg.expand(); // Раскрываем приложение на весь экран
 
-            // Проверяем, запущено ли приложение в Telegram
-            if (!Telegram.WebApp.initData) {
+            // Проверяем, запущено ли приложение внутри Telegram
+            if (!tg.initData) {
                 throw new Error('Приложение должно быть запущено внутри Telegram.');
             }
 
-            // Запрашиваем slug при загрузке
+            // Меняем цвет шапки в зависимости от темы Telegram
+             tg.setHeaderColor(tg.colorScheme === 'dark' ? '#111827' : '#4facfe'); // Темно-серый для темной, синий для светлой
+
+            // Запрашиваем slug счета при загрузке
             fetchInvoiceSlug();
 
         } catch (error) {
-            console.error("Ошибка инициализации:", error);
+            console.error("Ошибка инициализации Telegram Web App:", error);
             showError(error.message || 'Ошибка инициализации Telegram Web App.');
             buyButton.style.display = 'none'; // Скрыть кнопку, если не в Telegram
             infoMessage.textContent = 'Пожалуйста, откройте это приложение внутри Telegram.';
             loader.classList.add('hidden');
         }
 
-        // --- Обработчик клика по кнопке ---
+        // --- Обработчик клика по кнопке "BUY" ---
         buyButton.addEventListener('click', () => {
             console.log('Кнопка "BUY" нажата');
 
+            // Проверяем, был ли получен slug
             if (!invoiceSlug) {
                 showError('Ошибка: Slug счета не был получен. Попробуйте перезагрузить.');
                 console.error('Попытка оплаты без slug.');
+                // Можно попробовать запросить slug еще раз
+                // fetchInvoiceSlug();
                 return;
             }
 
-            if (Telegram.WebApp && Telegram.WebApp.openInvoice) {
+            // Проверяем, доступен ли метод openInvoice
+            if (tg && tg.openInvoice) {
                 try {
                     console.log(`Открытие счета с slug: ${invoiceSlug}`);
-                    Telegram.WebApp.openInvoice(invoiceSlug, (status) => {
+                    // Вызываем метод Telegram API для открытия окна оплаты
+                    tg.openInvoice(invoiceSlug, (status) => {
                         console.log('Статус платежа:', status);
+                        // Обрабатываем результат платежа
                         if (status === 'paid') {
-                            // Важно: Реальная проверка и предоставление доступа
-                            // должны происходить на бэкенде через вебхуки!
-                            // Здесь можно показать сообщение об успехе.
-                            Telegram.WebApp.showPopup({
+                            // Важно: Реальная проверка оплаты и предоставление доступа
+                            // должны происходить на бэкенде через вебхуки от Telegram!
+                            // Здесь мы просто показываем сообщение пользователю.
+                            tg.showPopup({
                                 title: 'Успех!',
                                 message: 'Оплата прошла успешно! Спасибо.',
                                 buttons: [{ type: 'ok' }]
                             });
-                            // Можно закрыть Mini App после успеха
-                            // Telegram.WebApp.close();
+                            // Опционально: закрыть Mini App после успешной оплаты
+                            // tg.close();
                         } else if (status === 'cancelled') {
-                            console.log('Платеж отменен.');
-                            // Можно показать сообщение, если нужно
+                            console.log('Платеж отменен пользователем.');
+                            // Можно показать сообщение об отмене, если нужно
+                            // showError('Вы отменили платеж.');
                         } else if (status === 'failed') {
                             showError('Ошибка платежа. Попробуйте снова.');
                         } else if (status === 'pending') {
                             console.log('Платеж в обработке.');
-                            // Обычно не требует действий на фронте
+                            // Обычно не требует действий на фронте, ждем вебхук на бэкенде
                         }
                     });
                 } catch (error) {
