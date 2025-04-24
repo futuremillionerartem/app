@@ -58,7 +58,7 @@
     </div>
 
     <div id="errorMessage" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg text-center hidden z-50">
-        </div>
+    </div>
 
     <script>
         const buyButton = document.getElementById('buyButton');
@@ -67,9 +67,8 @@
         const loader = document.getElementById('loader');
 
         // --- ВАЖНО: Укажите URL вашего бэкэнда ---
-        // Если фронтенд и бэкенд на одном домене, можно использовать относительный путь:
-
-        const BACKEND_URL = 'https://server-red-nu-83.vercel.app/';
+        const BACKEND_URL = 'https://server-red-nu-83.vercel.app'; // Базовый URL
+        const INVOICE_ENDPOINT = '/create-invoice'; // Эндпоинт для создания счета
         // -----------------------------------------
 
         let invoiceSlug = null; // Переменная для хранения slug
@@ -89,7 +88,10 @@
             infoMessage.textContent = 'Подготовка счета...';
 
             try {
-                const response = await fetch(BACKEND_URL);
+                // --- ИСПРАВЛЕНО: Обращаемся к правильному эндпоинту ---
+                const response = await fetch(BACKEND_URL + INVOICE_ENDPOINT);
+                // -----------------------------------------------------
+
                 if (!response.ok) {
                     // Попытка прочитать тело ошибки от бэкенда
                     let errorDetails = 'Не удалось получить данные от сервера.';
