@@ -2,200 +2,338 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Купить за Stars</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>3D Pixel Coin</title>
     <style>
-        body { font-family: 'Inter', sans-serif; }
-        .gradient-button {
-            background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px 0 rgba(79, 172, 254, 0.4);
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            background: #1a1a1a;
+            font-family: 'Arial', sans-serif;
+            touch-action: pan-y;
+            perspective: 1000px;
+            overflow: hidden;
+            padding-bottom: 80px;
         }
-        .gradient-button:hover {
-            background-position: right center;
-            box-shadow: 0 6px 20px 0 rgba(79, 172, 254, 0.6);
-        }
-        .gradient-button:active { transform: scale(0.95); }
-        .gradient-button:disabled {
-             background-image: linear-gradient(to right, #a0aec0 0%, #cbd5e0 100%);
-             cursor: not-allowed;
-             opacity: 0.6;
-             box-shadow: none;
-        }
-        /* Стили для индикатора загрузки */
-        .loader {
-            border: 4px solid #f3f3f3; /* Light grey */
-            border-top: 4px solid #4facfe; /* Blue */
+
+        .scene {
+        position: relative;
+        width: 200px;
+        height: 150px;
+        transform-style: preserve-3d;
+        display: flex;          /* Добавлено */
+        justify-content: center;/* Центрирование по горизонтали */
+    }
+    
+    .coin {
+        position: absolute;
+        width: 135px;
+        height: 135px;
+        /* Убрано left: 21% и left: 50% */
+        transform-style: preserve-3d;
+        transition: transform 0.1s linear;
+    }
+
+        .coin-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto; /* Центрирование */
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 0 15px rgba(0,0,0,0.4);
+            background-size: cover;
+            background-position: center;
+            border: 4px solid;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        .front {
+            background: url('dogs.png') no-repeat center center;
+            background-size: cover;
+            border-color: #ffffff;
+        }
+
+        .back {
+            background: url('not.png') no-repeat center center;
+            background-size: cover;
+            border-color: #ffffff;
+            transform: rotateY(180deg) translateZ(6px);
+        }
+
+        .edge {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    #666 0px,
+                    #666 3px,
+                    #888 3px,
+                    #888 6px
+                );
+            transform: translateZ(-4px);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+        }
+
+        .shadow {
+            position: absolute;
+            width: 160px;
+            height: 40px;
+            background: radial-gradient(rgba(0,0,0,0.4), transparent 70%);
+            bottom: -50px;
+            left: 20px;
+            filter: blur(5px);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .result {
+            font-size: 24px;
+            color: white;
+            margin: 20px;
+            min-height: 30px;
+            text-align: center;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .result.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .info {
+            color: #666;
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .menu {
+            margin-top: 30px;
+            margin-bottom: -30vh;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 8px 0;
+            background: #2a2a2a;
+            z-index: 10;
+            border-radius: 20px;
+            overflow: hidden;
+            gap: 25px;
+        }
+
+        .menu-item {
+            padding: 10px;
+            transition: transform 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+        }
+
+        .menu-item img {
+            width: 32px;
+            height: 32px;
+            filter: invert(0.6);
+            margin-bottom: 8px;
+        }
+
+        .menu-item span {
+            color: #888;
+            font-size: 12px;
+            font-family: Arial, sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .menu-item:hover {
+            transform: translateY(-3px);
+        }
+
+        .menu-item:hover span {
+            color: #fff;
+            transition: color 0.2s;
         }
     </style>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white">
+<body>
+    <div class="scene">
+        <div class="coin" id="coin">
+            <div class="coin-face front"></div>
+            <div class="coin-face back"></div>
+            <div class="edge"></div>
+        </div>
+        <div class="shadow" id="shadow"></div>
+    </div>
+    <div class="result" id="result"></div>
+    <div class="info">Swipe up to throw</div>
 
-    <div class="flex flex-col items-center justify-center min-h-screen text-center p-4">
-
-        <div id="loader" class="loader mb-4 hidden"></div>
-
-        <button id="buyButton" class="gradient-button text-white font-bold py-4 px-10 rounded-full text-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-cyan-500" disabled>
-            BUYY (100 Stars)
-        </button>
-
-        <p id="infoMessage" class="mt-4 text-gray-400 text-sm"></p>
-
+    <div class="menu">
+        <a href="#" class="menu-item">
+            <img src="user.png" alt="Profile">
+            <span>Top</span>
+        </a>
+        <a href="#" class="menu-item">
+            <img src="gift.png" alt="Gifts">
+            <span>Skins</span>
+        </a>
+        <a href="#" class="menu-item">
+            <img src="star.png" alt="Stars">
+            <span>Game</span>
+        </a>
+        <a href="#" class="menu-item">
+            <img src="tg.png" alt="Telegram">
+            <span>Tournament</span>
+        </a>
     </div>
 
-    <div id="errorMessage" class="fixed bottom-5 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg text-center hidden z-50">
-    </div>
+<script>
+    let touchStartY = 0;
+    let touchStartTime = 0;
+    let isAnimating = false;
+    let tossPower = 0;
+    let animationFrame;
+    let bounceCount = 0;
 
-    <script>
-        const buyButton = document.getElementById('buyButton');
-        const errorMessage = document.getElementById('errorMessage');
-        const infoMessage = document.getElementById('infoMessage');
-        const loader = document.getElementById('loader');
+    const physics = {
+        gravity: 0.002,
+        dampening: 0.75,
+        minVelocity: 1,
+        maxBounces: 30,
+        rotationDecay: 0.85
+    };
 
-        // --- ВАЖНО: Укажите URL вашего бэкэнда ---
-        const BACKEND_URL = 'https://server-red-nu-83.vercel.app'; // Базовый URL
-        const INVOICE_ENDPOINT = '/create-invoice'; // Эндпоинт для создания счета
-        // -----------------------------------------
+    const handleStart = (e) => {
+        if (isAnimating) return;
+        touchStartY = e.touches ? e.touches[0].clientY : e.clientY;
+        touchStartTime = Date.now();
+        document.getElementById('result').textContent = '';
+    };
 
-        let invoiceSlug = null; // Переменная для хранения slug
-
-        // Функция для отображения ошибок
-        function showError(message) {
-            errorMessage.textContent = message;
-            errorMessage.classList.remove('hidden');
-            setTimeout(() => errorMessage.classList.add('hidden'), 5000); // Скрыть через 5 сек
+    const handleEnd = (e) => {
+        if (isAnimating) return;
+        
+        const endY = e.changedTouches ? 
+            e.changedTouches[0].clientY : 
+            e.clientY;
+        
+        const deltaY = touchStartY - endY;
+        const swipeTime = Date.now() - touchStartTime;
+        
+        if (deltaY > 50 && swipeTime < 300) {
+            tossPower = Math.min(deltaY / 150, 1.5);
+            startTossAnimation();
         }
+    };
 
-        // Функция для получения slug с бэкэнда
-        async function fetchInvoiceSlug() {
-            console.log('Запрос slug с бэкэнда...');
-            loader.classList.remove('hidden'); // Показать индикатор загрузки
-            buyButton.disabled = true; // Деактивировать кнопку на время запроса
-            infoMessage.textContent = 'Подготовка счета...';
+    const startTossAnimation = () => {
+        if (animationFrame) cancelAnimationFrame(animationFrame);
+        
+        isAnimating = true;
+        bounceCount = 0;
+        const coin = document.getElementById('coin');
+        const shadow = document.getElementById('shadow');
+        
+        let velocity = tossPower * 0.8;
+        let height = 0;
+        let rotation = 0;
+        let rotationVelocity = tossPower * 0.5;
+        let time = 0;
+        
+        const animate = (timestamp) => {
+            if (!time) time = timestamp;
+            const deltaTime = timestamp - time;
+            time = timestamp;
 
-            try {
-                // --- ИСПРАВЛЕНО: Обращаемся к правильному эндпоинту ---
-                const response = await fetch(BACKEND_URL + INVOICE_ENDPOINT);
-                // -----------------------------------------------------
-
-                if (!response.ok) {
-                    // Попытка прочитать тело ошибки от бэкенда
-                    let errorDetails = 'Не удалось получить данные от сервера.';
-                    try {
-                        const errorData = await response.json();
-                        errorDetails = errorData.error || errorDetails;
-                        if (errorData.details) {
-                             errorDetails += ` (${errorData.details})`;
-                        }
-                    } catch (e) { /* Игнорируем ошибку парсинга JSON ответа */ }
-                    throw new Error(`Ошибка сети: ${response.status} ${response.statusText}. ${errorDetails}`);
+            height += velocity * deltaTime;
+            velocity -= physics.gravity * deltaTime;
+            
+            if (height < 0) {
+                height = 0;
+                velocity = -velocity * physics.dampening;
+                rotationVelocity *= physics.rotationDecay;
+                bounceCount++;
+                
+                if (bounceCount >= physics.maxBounces || 
+                    Math.abs(velocity) < physics.minVelocity) {
+                    endAnimation(rotation);
+                    return;
                 }
-
-                const data = await response.json();
-
-                if (data.invoiceUrl) {
-                    // Извлекаем slug из URL (он находится после 't.me/invoice/')
-                    const urlParts = data.invoiceUrl.split('/');
-                    invoiceSlug = urlParts[urlParts.length - 1]; // Последняя часть URL - это slug
-                    console.log('Slug успешно получен:', invoiceSlug);
-                    buyButton.disabled = false; // Активировать кнопку
-                    infoMessage.textContent = ''; // Очистить инфо-сообщение
-                } else {
-                    throw new Error('Некорректный ответ от бэкэнда: отсутствует invoiceUrl.');
-                }
-
-            } catch (error) {
-                console.error('Ошибка при получении slug:', error);
-                showError(`Ошибка получения счета: ${error.message}`);
-                infoMessage.textContent = 'Не удалось подготовить счет.';
-                 // Оставляем кнопку неактивной
-            } finally {
-                 loader.classList.add('hidden'); // Скрыть индикатор загрузки
-            }
-        }
-
-        // --- Инициализация приложения ---
-        try {
-            Telegram.WebApp.ready();
-            Telegram.WebApp.expand(); // Раскрыть на весь экран для лучшего вида
-
-            // Проверяем, запущено ли приложение в Telegram
-            if (!Telegram.WebApp.initData) {
-                throw new Error('Приложение должно быть запущено внутри Telegram.');
             }
 
-            // Запрашиваем slug при загрузке
-            fetchInvoiceSlug();
+            rotation += rotationVelocity * deltaTime;
+            
+            const shadowOpacity = Math.min(height / 200, 0.6);
+            shadow.style.opacity = shadowOpacity;
+            shadow.style.transform = `scale(${1 + height/120})`;
 
-        } catch (error) {
-            console.error("Ошибка инициализации:", error);
-            showError(error.message || 'Ошибка инициализации Telegram Web App.');
-            buyButton.style.display = 'none'; // Скрыть кнопку, если не в Telegram
-            infoMessage.textContent = 'Пожалуйста, откройте это приложение внутри Telegram.';
-            loader.classList.add('hidden');
-        }
+            coin.style.transform = `
+                translateY(${-height}px)
+                rotateX(${height * 0.3}deg)
+                rotateY(${rotation}deg)
+            `;
 
-        // --- Обработчик клика по кнопке ---
-        buyButton.addEventListener('click', () => {
-            console.log('Кнопка "BUY" нажата');
+            animationFrame = requestAnimationFrame(animate);
+        };
 
-            if (!invoiceSlug) {
-                showError('Ошибка: Slug счета не был получен. Попробуйте перезагрузить.');
-                console.error('Попытка оплаты без slug.');
-                return;
+        const endAnimation = (currentRotation) => {
+            cancelAnimationFrame(animationFrame);
+            
+            // Выбираем случайный результат 50/50
+            const outcome = Math.random() < 0.5 ? 'DOGS' : 'NOT';
+            // Рассчитываем итоговый угол так, чтобы результат соответствовал выбранному:
+            // Если outcome = 'DOGS' - итоговый угол должен быть кратен 360 (0°), если 'NOT' - на 180° больше
+            let base = Math.floor(currentRotation / 360) * 360 + 360;
+            let targetRotation = base + (outcome === 'DOGS' ? 0 : 180);
+            // На случай, если текущий угол уже больше вычисленного
+            if (targetRotation < currentRotation) {
+                targetRotation += 360;
             }
+            
+            coin.style.transition = 'transform 0.7s cubic-bezier(0.33, 0, 0.67, 1)';
+            coin.style.transform = `
+                translateY(0)
+                rotateX(0deg)
+                rotateY(${targetRotation}deg)
+            `;
 
-            if (Telegram.WebApp && Telegram.WebApp.openInvoice) {
-                try {
-                    console.log(`Открытие счета с slug: ${invoiceSlug}`);
-                    Telegram.WebApp.openInvoice(invoiceSlug, (status) => {
-                        console.log('Статус платежа:', status);
-                        if (status === 'paid') {
-                            // Важно: Реальная проверка и предоставление доступа
-                            // должны происходить на бэкенде через вебхуки!
-                            // Здесь можно показать сообщение об успехе.
-                            Telegram.WebApp.showPopup({
-                                title: 'Успех!',
-                                message: 'Оплата прошла успешно! Спасибо.',
-                                buttons: [{ type: 'ok' }]
-                            });
-                            // Можно закрыть Mini App после успеха
-                            // Telegram.WebApp.close();
-                        } else if (status === 'cancelled') {
-                            console.log('Платеж отменен.');
-                            // Можно показать сообщение, если нужно
-                        } else if (status === 'failed') {
-                            showError('Ошибка платежа. Попробуйте снова.');
-                        } else if (status === 'pending') {
-                            console.log('Платеж в обработке.');
-                            // Обычно не требует действий на фронте
-                        }
-                    });
-                } catch (error) {
-                    console.error("Ошибка при вызове openInvoice:", error);
-                    showError('Не удалось инициировать платеж. Попробуйте позже.');
-                }
-            } else {
-                console.error('Telegram.WebApp.openInvoice не доступен.');
-                showError('Ошибка: Функция оплаты доступна только в Telegram.');
-            }
-        });
+            shadow.style.transition = 'opacity 0.4s';
+            shadow.style.opacity = 0;
 
-    </script>
+            setTimeout(() => {
+                const resultElement = document.getElementById('result');
+                resultElement.textContent = outcome;
+                resultElement.classList.add('visible');
+                isAnimating = false;
+                
+                setTimeout(() => {
+                    coin.style.transition = 'none';
+                    shadow.style.transition = 'none';
+                    resultElement.classList.remove('visible');
+                }, 900);
+            }, 300);
+        };
 
+        coin.style.transition = 'none';
+        shadow.style.transition = 'opacity 0.3s, transform 0.3s';
+        animationFrame = requestAnimationFrame(animate);
+    };
+
+    document.addEventListener('touchstart', handleStart);
+    document.addEventListener('touchend', handleEnd);
+    document.addEventListener('mousedown', handleStart);
+    document.addEventListener('mouseup', handleEnd);
+</script>
 </body>
 </html>
